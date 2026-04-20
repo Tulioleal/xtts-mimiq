@@ -24,14 +24,11 @@ COPY tts/src/streaming/server.py ./server.py
 COPY tts/src/watchdog/watchdog.py ./watchdog.py
 COPY tts/docker/entrypoint.sh ./entrypoint.sh
 
-# PARCHE DE DEPENDENCIAS:
-# Instalamos una versión de NumPy que satisfaga a librosa ANTES de los requirements
-RUN pip install --no-cache-dir "numpy>=1.23.5,<1.25.0"
+RUN pip install --no-cache-dir "numpy>=1.23.5,<1.25.0" "transformers>=4.31.0,<4.35.0"
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Definimos que aceptamos los términos de servicio para evitar el error de EOF
 ENV COQUI_TOS_AGREED=1
-
 RUN python3 -c "\
 from TTS.api import TTS; \
 import os; \
