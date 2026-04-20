@@ -17,9 +17,9 @@ RUN ln -s /usr/bin/python3.11 /usr/bin/python
 
 WORKDIR /app
 
-COPY tts/requirements.txt ./requirements.txt
-COPY tts/src/ ./src/
-COPY tts/docker/entrypoint.sh ./entrypoint.sh
+COPY requirements.txt ./requirements.txt
+COPY src/ ./src/
+COPY docker/entrypoint.sh ./entrypoint.sh
 
 RUN pip install --no-cache-dir -r requirements.txt
 
