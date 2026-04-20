@@ -1,0 +1,26 @@
+name: Stop TTS Instance
+
+on:
+  workflow_dispatch:
+
+jobs:
+  stop:
+    name: Stop Vast.ai Instance
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Stop instance
+        env:
+          VAST_API_KEY: ${{ secrets.VAST_API_KEY }}
+        run: python scripts/vastai_control.py stop

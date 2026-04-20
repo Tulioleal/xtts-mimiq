@@ -1,0 +1,42 @@
+name: Start TTS Instance
+
+# Permite prender la instancia Vast.ai desde GitHub Actions
+# Util para activarla antes de una sesion de trabajo
+on:
+  workflow_dispatch:
+    inputs:
+      gpu_type:
+        description: 'GPU type'
+        required: false
+        default: 'RTX_3090'
+        type: choice
+        options:
+          - RTX_3090
+          - RTX_4090
+          - A6000
+
+jobs:
+  start:
+    name: Start Vast.ai Instance
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Start instance
+        env:
+          VAST_API_KEY: ${{ secrets.VAST_API_KEY }}
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          BACKEND_URL: ${{ secrets.BACKEND_URL }}
+          INTERNAL_SECRET: ${{ secrets.INTERNAL_SECRET }}
+          VAST_GPU_TYPE: ${{ github.event.inputs.gpu_type }}
+        run: python scripts/vastai_control.py start
