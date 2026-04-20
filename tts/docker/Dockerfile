@@ -13,7 +13,8 @@ RUN apt-get update && apt-get install -y \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-RUN ln -s /usr/bin/python3.11 /usr/bin/python
+RUN ln -sf /usr/bin/python3.10 /usr/bin/python && \
+    ln -sf /usr/bin/pip3 /usr/bin/pip
 
 WORKDIR /app
 
@@ -23,10 +24,12 @@ COPY tts/src/streaming/server.py ./server.py
 COPY tts/src/watchdog/watchdog.py ./watchdog.py
 COPY tts/docker/entrypoint.sh ./entrypoint.sh
 
-RUN pip install --no-cache-dir "numpy<1.27,>=1.23" 
+# PARCHE DE DEPENDENCIAS:
+# Instalamos una versión de NumPy que satisfaga a librosa ANTES de los requirements
+RUN pip install --no-cache-dir "numpy>=1.23.5,<1.25.0"
 RUN pip install --no-cache-dir -r requirements.txt
 
-RUN python -c "\
+RUN python3 -c "\
 from TTS.api import TTS; \
 import os; \
 os.makedirs('/app/model', exist_ok=True); \
