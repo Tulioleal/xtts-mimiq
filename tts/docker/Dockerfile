@@ -18,7 +18,9 @@ RUN ln -s /usr/bin/python3.11 /usr/bin/python
 WORKDIR /app
 
 COPY tts/requirements.txt ./requirements.txt
-COPY tts/src/ ./src/
+COPY tts/src/inference/xtts_wrapper.py ./xtts_wrapper.py
+COPY tts/src/streaming/server.py ./server.py
+COPY tts/src/watchdog/watchdog.py ./watchdog.py
 COPY tts/docker/entrypoint.sh ./entrypoint.sh
 
 RUN pip install --no-cache-dir -r requirements.txt
