@@ -29,6 +29,9 @@ COPY tts/docker/entrypoint.sh ./entrypoint.sh
 RUN pip install --no-cache-dir "numpy>=1.23.5,<1.25.0"
 RUN pip install --no-cache-dir -r requirements.txt
 
+# Definimos que aceptamos los términos de servicio para evitar el error de EOF
+ENV COQUI_TOS_AGREED=1
+
 RUN python3 -c "\
 from TTS.api import TTS; \
 import os; \
