@@ -3,6 +3,7 @@ FROM nvidia/cuda:12.1.0-cudnn8-runtime-ubuntu22.04
 ENV DEBIAN_FRONTEND=noninteractive
 ENV PYTHONUNBUFFERED=1
 ENV TTS_HOME=/app/model
+ENV COQUI_TOS_AGREED=1
 
 RUN apt-get update && apt-get install -y \
     python3.10 \
@@ -16,6 +17,8 @@ RUN apt-get update && apt-get install -y \
 RUN ln -sf /usr/bin/python3.10 /usr/bin/python && \
     ln -sf /usr/bin/pip3 /usr/bin/pip
 
+RUN pip install --no-cache-dir --upgrade pip setuptools wheel
+
 WORKDIR /app
 
 COPY tts/requirements.txt ./requirements.txt
@@ -27,8 +30,6 @@ COPY tts/docker/entrypoint.sh ./entrypoint.sh
 RUN pip install --no-cache-dir "numpy>=1.23.5,<1.25.0" "transformers>=4.31.0,<4.35.0"
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Definimos que aceptamos los términos de servicio para evitar el error de EOF
-ENV COQUI_TOS_AGREED=1
 RUN python3 -c "\
 from TTS.api import TTS; \
 import os; \
