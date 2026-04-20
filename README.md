@@ -87,7 +87,7 @@ Solo es necesario repetir este paso si se modifica el código del servicio (`tts
 
 ### Prender la instancia GPU
 
-**Desde GitHub Actions** (recomendado, no requiere nada instalado localmente):
+**Desde GitHub Actions**:
 
 Ir a **Actions → Start TTS Instance → Run workflow**. Se puede elegir el tipo de GPU en el menú desplegable (RTX 3090 por defecto).
 
