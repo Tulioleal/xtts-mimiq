@@ -17,8 +17,10 @@ RUN ln -s /usr/bin/python3.11 /usr/bin/python
 
 WORKDIR /app
 
-# context es la raiz del repo, los paths son relativos a ella
-COPY tts/requirements.txt .
+COPY tts/requirements.txt ./requirements.txt
+COPY tts/src/ ./src/
+COPY tts/docker/entrypoint.sh ./entrypoint.sh
+
 RUN pip install --no-cache-dir -r requirements.txt
 
 RUN python -c "\
@@ -28,11 +30,8 @@ os.makedirs('/app/model', exist_ok=True); \
 tts = TTS('tts_models/multilingual/multi-dataset/xtts_v2'); \
 print('Model downloaded successfully')"
 
-COPY tts/src/ ./src/
+RUN chmod +x ./entrypoint.sh
 
 EXPOSE 8000
 
-COPY tts/docker/entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
-
-ENTRYPOINT ["/entrypoint.sh"]
+ENTRYPOINT ["./entrypoint.sh"]
