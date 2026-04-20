@@ -5,9 +5,9 @@ ENV PYTHONUNBUFFERED=1
 ENV TTS_HOME=/app/model
 
 RUN apt-get update && apt-get install -y \
-    python3.11 \
+    python3.10 \
     python3-pip \
-    python3.11-dev \
+    python3.10-dev \
     ffmpeg \
     git \
     curl \
@@ -23,6 +23,7 @@ COPY tts/src/streaming/server.py ./server.py
 COPY tts/src/watchdog/watchdog.py ./watchdog.py
 COPY tts/docker/entrypoint.sh ./entrypoint.sh
 
+RUN pip install --no-cache-dir "numpy<1.27,>=1.23" 
 RUN pip install --no-cache-dir -r requirements.txt
 
 RUN python -c "\
