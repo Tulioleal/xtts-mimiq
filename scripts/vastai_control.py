@@ -73,7 +73,7 @@ def find_best_offer():
             and o.get("disk_space", 0) >= 30
             and o.get("num_gpus", 0) == 1
             and o.get("gpu_ram", 0) >= 12000
-            and (o.get("cuda_max_good") or o.get("cuda_vers", 0) >= 11.8)
+            and (o.get("cuda_max_good", 0) >= 11.8 or o.get("cuda_vers", 0) >= 11.8)
     ]
     
     if not filtered:
@@ -115,7 +115,7 @@ def start_instance():
     }
     env_string = " ".join(f"-e {k}={v}" for k, v in env_vars.items() if v)
 
-    result = api_post(f"/asks/{offer_id}/", {
+    result = api_post(f"/asks/{offer_id}", {
         "client_id": "me",
         "image": image,
         "disk": 40,          # GB de disco
@@ -234,7 +234,7 @@ if __name__ == "__main__":
 
     cmd = sys.argv[1]
     if cmd == "start":
-        start_instance()
+        find_best_offer()
     elif cmd == "stop":
         stop_instance()
     elif cmd == "status":
