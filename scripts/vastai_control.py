@@ -62,28 +62,32 @@ import json
 def find_best_offer():
     print(f"Searching for {GPU_TYPE} offers...")
     
-    cmd = [
-        "vastai", "search", "offers",
-        f'gpu_name="{GPU_TYPE}" reliability>0.9 rentable=true disk_space>=40 num_gpus=1',
-        "--order", "dph_total",
-        "--raw",
+    r = requests.get(f"{API_BASE}/bundles", headers=HEADERS)
+    r.raise_for_status()
+    offers = r.json().get("offers", [])
+    
+    filtered = [
+        o for o in offers
+            if o.get("reliability2", 0) >= 0.90
+            and o.get("rentable", False)
+            and o.get("disk_space", 0) >= 30
+            and o.get("num_gpus", 0) == 1
+            and o.get("gpu_ram", 0) >= 12000
+            and (o.get("cuda_max_good") or o.get("cuda_vers", 0) >= 11.8)
     ]
     
-    result = subprocess.run(
-        cmd,
-        capture_output=True,
-        text=True,
-        env={**os.environ, "VAST_API_KEY": API_KEY}
-    )
-    offers = json.loads(result.stdout)
-    
-    if not offers:
+    if not filtered:
         print(f"No offers found for {GPU_TYPE}.")
         sys.exit(1)
     
-    best = offers[0]
+    filtered.sort(key=lambda o: o.get("dph_total", 999))
+    best = filtered[0]
     print(f"Best offer: ID={best['id']} GPU={best['gpu_name']} "
-          f"Price=${best['dph_total']:.3f}/hr")
+          f"Price=${best['dph_total']:.3f}/hr"
+          f" Reliability={best.get('reliability2', 0):.2%}"
+          f" Disk={best.get('disk_space', 0)}GB"
+          f" Rentable={best.get('rentable', False)}"
+          f" VRAM={best.get('gpu_ram', 0)  / 1024}GB")
     return best["id"]
 
 
