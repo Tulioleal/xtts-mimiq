@@ -117,7 +117,12 @@ def start_instance():
         "WATCHDOG_TIMEOUT_SECONDS": "1800",
     }
 
-    body = {"image": image, "disk": 40, "env": {k: v for k, v in env_vars.items() if v}}
+    body = {
+        "image": image,
+        "disk": 40,
+        "env": {k: v for k, v in env_vars.items() if v},
+        "ports": "8000/tcp"
+    }
         
     result = api_put(
         f"/asks/{offer_id}/",
