@@ -75,7 +75,7 @@ def find_best_offer():
             and o.get("rentable", False)
             and o.get("disk_space", 0) >= 30
             and o.get("num_gpus", 0) == 1
-            and o.get("gpu_ram", 0) >= 16000
+            and o.get("gpu_ram", 0) >= 12000
             and (o.get("cuda_max_good", 0) >= 11.8 or o.get("cuda_vers", 0) >= 11.8)
     ]
     
