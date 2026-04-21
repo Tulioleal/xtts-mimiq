@@ -74,7 +74,7 @@ def find_best_offer():
             and o.get("rentable", False)
             and o.get("disk_space", 0) >= 30
             and o.get("num_gpus", 0) == 1
-            and o.get("gpu_ram", 0) >= 12000
+            and o.get("gpu_ram", 0) >= 16000
             and (o.get("cuda_max_good", 0) >= 11.8 or o.get("cuda_vers", 0) >= 11.8)
     ]
     
@@ -117,14 +117,14 @@ def start_instance():
     }
     env_string = " ".join(f"-e {k}={v}" for k, v in env_vars.items() if v)
 
-    result = api_put(f"/asks/{offer_id}", {
-        "client_id": "me",
-        "image": image,
-        "disk": 40,          # GB de disco
-        "env": env_string,
-        "onstart": "",       # el entrypoint del Dockerfile se encarga
-        "runtype": "args",
-    })
+    body = {"image": image, "disk": 40}
+    if env_string:
+        body["env"] = env_string
+        
+    result = api_put(
+        f"/asks/{offer_id}/",
+        body
+    )
 
     instance_id = result.get("new_contract")
     if not instance_id:
