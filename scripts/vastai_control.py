@@ -13,7 +13,6 @@ Variables de entorno requeridas:
 
 Variables opcionales:
   VAST_INSTANCE_ID    — si ya tenes una instancia y queres apagarla sin buscar
-  VAST_GPU_TYPE       — tipo de GPU (default: RTX_3090)
 """
 
 import sys
@@ -31,7 +30,6 @@ except ImportError:
 API_BASE = "https://console.vast.ai/api/v0"
 API_KEY = os.environ["VAST_API_KEY"]
 DOCKERHUB_USERNAME = os.environ.get("DOCKERHUB_USERNAME", "")
-GPU_TYPE = os.environ.get("VAST_GPU_TYPE", "RTX_3090")
 BACKEND_URL = os.environ.get("BACKEND_URL", "")
 INTERNAL_SECRET = os.environ.get("INTERNAL_SECRET", "")
 
@@ -60,7 +58,7 @@ import subprocess
 import json
 
 def find_best_offer():
-    print(f"Searching for {GPU_TYPE} offers...")
+    print(f"Searching for offers...")
     
     r = requests.get(f"{API_BASE}/bundles", headers=HEADERS)
     r.raise_for_status()
@@ -77,7 +75,7 @@ def find_best_offer():
     ]
     
     if not filtered:
-        print(f"No offers found for {GPU_TYPE}.")
+        print(f"No offers found.")
         sys.exit(1)
     
     filtered.sort(key=lambda o: o.get("dph_total", 999))
