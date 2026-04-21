@@ -22,6 +22,10 @@ import json
 import time
 import requests
 
+from dotenv import load_dotenv 
+
+load_dotenv()
+
 API_BASE = "https://console.vast.ai/api/v0"
 API_KEY = os.environ["VAST_API_KEY"]
 DOCKERHUB_USERNAME = os.environ.get("DOCKERHUB_USERNAME", "")
@@ -50,43 +54,34 @@ def api_delete(path):
     return r.json()
 
 
+import subprocess
+import json
+
 def find_best_offer():
-    """Busca la oferta mas barata que cumpla los requisitos minimos."""
     print(f"Searching for {GPU_TYPE} offers...")
-
-    # Query de busqueda: GPU tipo, al menos 1 GPU, CUDA 12+, confiabilidad alta
-    query = {
-        "gpu_name": {"eq": GPU_TYPE},
-        "num_gpus": {"eq": 1},
-        "cuda_max_good": {"gte": 12.0},
-        "reliability2": {"gte": 0.90},
-        "rentable": {"eq": True},
-        "disk_space": {"gte": 40},   # necesitamos espacio para el modelo (~20GB con deps)
-    }
-
-    r = requests.get(
-        f"{API_BASE}/bundles",
-        headers=HEADERS,
-        params={"q": json.dumps(query)},
+    
+    cmd = [
+        "vastai", "search", "offers",
+        f'gpu_name="{GPU_TYPE}" reliability>0.9 rentable=true disk_space>=40 num_gpus=1',
+        "--order", "dph_total",
+        "--raw",
+    ]
+    
+    result = subprocess.run(
+        cmd,
+        capture_output=True,
+        text=True,
+        env={**os.environ, "VAST_API_KEY": API_KEY}
     )
-    r.raise_for_status()
-    res = r.json()
-    print(res)
-    offers = res.get("offers", [])
-
+    offers = json.loads(result.stdout)
+    
     if not offers:
-        print(f"No offers found for {GPU_TYPE}. Try changing VAST_GPU_TYPE.")
-        print("Available GPU types: RTX_3090, RTX_4090, A100, A6000")
+        print(f"No offers found for {GPU_TYPE}.")
         sys.exit(1)
-
-    # Ordenar por precio por hora (dph_total)
-    offers.sort(key=lambda o: o.get("dph_total", 999))
+    
     best = offers[0]
-
     print(f"Best offer: ID={best['id']} GPU={best['gpu_name']} "
-          f"Price=${best['dph_total']:.3f}/hr "
-          f"Reliability={best.get('reliability2', 0):.2%}")
-
+          f"Price=${best['dph_total']:.3f}/hr")
     return best["id"]
 
 
@@ -233,7 +228,7 @@ if __name__ == "__main__":
 
     cmd = sys.argv[1]
     if cmd == "start":
-        start_instance()
+        find_best_offer()
     elif cmd == "stop":
         stop_instance()
     elif cmd == "status":
