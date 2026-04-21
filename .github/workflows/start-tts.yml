@@ -6,9 +6,9 @@ on:
   workflow_dispatch:
     inputs:
       gpu_type:
-        description: 'GPU type'
+        description: "GPU type"
         required: false
-        default: 'RTX_3090'
+        default: "RTX_3090"
         type: choice
         options:
           - RTX_3090
@@ -22,12 +22,12 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
-          python-version: '3.11'
+          python-version: "3.10"
 
       - name: Install dependencies
         run: pip install requests
