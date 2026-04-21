@@ -232,7 +232,7 @@ if __name__ == "__main__":
 
     cmd = sys.argv[1]
     if cmd == "start":
-        find_best_offer()
+        start_instance()
     elif cmd == "stop":
         stop_instance()
     elif cmd == "status":
