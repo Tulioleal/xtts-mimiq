@@ -22,9 +22,11 @@ import json
 import time
 import requests
 
-from dotenv import load_dotenv 
-
-load_dotenv()
+try:
+    from dotenv import load_dotenv
+    load_dotenv(os.path.join(os.path.dirname(__file__), "..", ".env"))
+except ImportError:
+    pass
 
 API_BASE = "https://console.vast.ai/api/v0"
 API_KEY = os.environ["VAST_API_KEY"]
@@ -228,7 +230,7 @@ if __name__ == "__main__":
 
     cmd = sys.argv[1]
     if cmd == "start":
-        find_best_offer()
+        start_instance()
     elif cmd == "stop":
         stop_instance()
     elif cmd == "status":
