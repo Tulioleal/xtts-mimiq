@@ -47,6 +47,10 @@ def api_post(path, body):
     r.raise_for_status()
     return r.json()
 
+def api_put(path, body):
+    r = requests.put(f"{API_BASE}{path}", headers=HEADERS, json=body)
+    r.raise_for_status()
+    return r.json()
 
 def api_delete(path):
     r = requests.delete(f"{API_BASE}{path}", headers=HEADERS)
@@ -113,7 +117,7 @@ def start_instance():
     }
     env_string = " ".join(f"-e {k}={v}" for k, v in env_vars.items() if v)
 
-    result = api_post(f"/asks/{offer_id}", {
+    result = api_put(f"/asks/{offer_id}", {
         "client_id": "me",
         "image": image,
         "disk": 40,          # GB de disco
