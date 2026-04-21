@@ -70,7 +70,9 @@ def find_best_offer():
         params={"q": json.dumps(query)},
     )
     r.raise_for_status()
-    offers = r.json().get("offers", [])
+    res = r.json()
+    print(res)
+    offers = res.get("offers", [])
 
     if not offers:
         print(f"No offers found for {GPU_TYPE}. Try changing VAST_GPU_TYPE.")
