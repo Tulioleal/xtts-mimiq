@@ -17,7 +17,6 @@ Variables opcionales:
 
 import sys
 import os
-import json
 import time
 import requests
 
@@ -49,6 +48,8 @@ def api_post(path, body):
 
 def api_put(path, body):
     r = requests.put(f"{API_BASE}{path}", headers=HEADERS, json=body)
+    if not r.ok:
+        print(f"API error {r.status_code}: {r.text}")  # ← ver el mensaje exacto
     r.raise_for_status()
     return r.json()
 
@@ -115,11 +116,8 @@ def start_instance():
         "INTERNAL_SECRET": INTERNAL_SECRET,
         "WATCHDOG_TIMEOUT_SECONDS": "1800",
     }
-    env_string = " ".join(f"-e {k}={v}" for k, v in env_vars.items() if v)
 
-    body = {"image": image, "disk": 40}
-    if env_string:
-        body["env"] = env_string
+    body = {"image": image, "disk": 40, "env": {k: v for k, v in env_vars.items() if v}}
         
     result = api_put(
         f"/asks/{offer_id}/",
