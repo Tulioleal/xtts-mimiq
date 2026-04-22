@@ -81,7 +81,7 @@ def find_best_offer():
     
     if not filtered:
         print(f"No offers found.")
-        sys.exit(1)
+        return None
     
     filtered.sort(key=lambda o: o.get("dph_total", 999))
     best = filtered[0]
@@ -122,6 +122,20 @@ def start_instance():
         print(f"Instance already running: ID={existing['id']}")
         print_connection_info(existing)
         return existing["id"]
+    
+    deadline = time.time() + 300 
+    offer_id = None
+    while time.time() < deadline:
+        offer_id = find_best_offer()
+        if offer_id:
+            break
+        remaining = int(deadline - time.time())
+        print(f"Retrying in 15s ({remaining}s remaining)...")
+        time.sleep(15)
+
+    if not offer_id:
+        print("No offers found after 5 minutes. Giving up.")
+        sys.exit(1)
 
     offer_id = find_best_offer()
 
