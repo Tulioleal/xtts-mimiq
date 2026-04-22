@@ -13,4 +13,4 @@ export PORT=${PORT:-8000}
 echo "[entrypoint] Port: $PORT"
 
 echo "[entrypoint] Launching FastAPI server..."
-exec python /app/src/streaming/server.py
+exec python /app/server.py
