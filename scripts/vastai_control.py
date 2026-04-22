@@ -215,16 +215,31 @@ def _wait_until_running(instance_id: str, max_wait: int = 600):
     while time.time() < deadline:
         try:
             data = api_get(f"/instances/{instance_id}/")
-            # La API devuelve {"instances": {...}} o el objeto directo
             inst = data.get("instances", data)
-            # Si instances es una lista, tomar el primero
             if isinstance(inst, list):
                 inst = inst[0] if inst else {}
             status_val = inst.get("actual_status", "unknown") if isinstance(inst, dict) else "unknown"
+        except requests.exceptions.HTTPError as e:
+            if e.response.status_code == 429:
+                print("  Rate limited, waiting 60s...")
+                time.sleep(60)
+                continue
+            status_val = "unknown"
         except Exception as e:
             print(f"  Error polling: {e}")
             status_val = "unknown"
-        ...
+
+        print(f"\r  [{status_val}] {'.' * (dots % 4 + 1)}   ", end="", flush=True)
+        dots += 1
+
+        if status_val == "running":
+            print("\n  Instance is running!")
+            return
+
+        time.sleep(30)  # ← 30 en lugar de 15
+
+    print(f"\nTimeout after {max_wait}s. Check Vast.ai dashboard.")
+    sys.exit(1)
 
 
 if __name__ == "__main__":
