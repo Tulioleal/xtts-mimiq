@@ -19,6 +19,7 @@ import sys
 import os
 import time
 import requests
+import json
 
 try:
     from dotenv import load_dotenv
@@ -208,6 +209,9 @@ def status():
 def print_connection_info(instance):
     ip = instance.get("public_ipaddr", "unknown")
     ports = instance.get("ports", {}) or {}
+    
+    print(f"DEBUG ports dict: {json.dumps(ports, indent=2)}")  # ← temporal
+    
     mapped_port = "unknown"
     
     for key, val in ports.items():
