@@ -237,7 +237,7 @@ def print_connection_info(instance):
     print(f"  curl http://{ip}:{mapped_port}/health")
 
 
-def _wait_until_running(instance_id: str, max_wait: int = 600):
+def _wait_until_running(instance_id: str, max_wait: int = 900):
     deadline = time.time() + max_wait
     dots = 0
     while time.time() < deadline:

@@ -37,7 +37,9 @@ from TTS.api import TTS; \
 import os; \
 os.makedirs('/app/model', exist_ok=True); \
 tts = TTS('tts_models/multilingual/multi-dataset/xtts_v2'); \
-print('Model downloaded successfully')"
+print('Model downloaded successfully')" && \
+ls -la /app/model && \
+test -f /app/model/config.json || (echo 'ERROR: config.json missing!' && exit 1)
 
 RUN chmod +x ./entrypoint.sh
 
