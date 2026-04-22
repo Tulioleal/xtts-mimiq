@@ -48,3 +48,32 @@ Thumbs.db
 
 # Model cache (XTTS downloads models to ~/.cache/tts/)
 .cache/
+
+# test
+*.js
+
+# Audio
+*.mp3
+*.mp4
+*.wav
+*.flac
+*.aac
+*.ogg
+*.opus
+*.wma
+*.m4a
+*.m4b
+*.aiff
+*.aif
+*.au
+*.ra
+*.rm
+*.mid
+*.midi
+*.amr
+*.3gp
+*.webm
+*.caf
+*.dts
+*.ac3
+*.mka
