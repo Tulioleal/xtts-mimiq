@@ -37,9 +37,7 @@ from TTS.api import TTS; \
 import os; \
 os.makedirs('/app/model', exist_ok=True); \
 tts = TTS('tts_models/multilingual/multi-dataset/xtts_v2'); \
-print('Model downloaded successfully')" && \
-find / -name "config.json" 2>/dev/null | grep -i xtts
-
+print('Model downloaded successfully')"
 RUN chmod +x ./entrypoint.sh
 
 EXPOSE 8000
