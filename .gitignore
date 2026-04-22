@@ -51,6 +51,7 @@ Thumbs.db
 
 # test
 *.js
+test.*
 
 # Audio
 *.mp3
