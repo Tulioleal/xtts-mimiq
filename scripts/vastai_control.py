@@ -74,9 +74,8 @@ def find_best_offer():
             and o.get("num_gpus", 0) == 1
             and o.get("gpu_ram", 0) >= 12000
             and (o.get("cuda_max_good", 0) >= 11.8 or o.get("cuda_vers", 0) >= 11.8)
-            and o.get("gpu_frac", 0) == 1.0        # GPU dedicada completa, no particionada
-            and o.get("direct_port_count", 0) > 0  # tiene puertos directos disponibles
-            and (o.get("compute_cap", 0) >= 700 and o.get("compute_cap", 0) <= 860 )   # V100 en adelante, soporte amplio hasta RTX 3090/A100, evita arquitecturas muy nuevas
+            and o.get("gpu_frac", 0) == 1.0
+            and o.get("direct_port_count", 0) > 0
     ]
     
     if not filtered:
