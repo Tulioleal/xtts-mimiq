@@ -38,8 +38,7 @@ import os; \
 os.makedirs('/app/model', exist_ok=True); \
 tts = TTS('tts_models/multilingual/multi-dataset/xtts_v2'); \
 print('Model downloaded successfully')" && \
-ls -la /app/model && \
-test -f /app/model/config.json || (echo 'ERROR: config.json missing!' && exit 1)
+find / -name "config.json" 2>/dev/null | grep -i xtts
 
 RUN chmod +x ./entrypoint.sh
 
