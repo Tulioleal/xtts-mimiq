@@ -218,13 +218,10 @@ def status():
 
 
 def print_connection_info(instance):
-    ip = instance.get("public_ipaddr", "unknown")
+    ip = instance.get("ssh_host") or instance.get("public_ipaddr", "unknown")
     ports = instance.get("ports", {}) or {}
-    
-    print(f"DEBUG ports dict: {json.dumps(ports, indent=2)}")  # ← temporal
-    
+
     mapped_port = "unknown"
-    
     for key, val in ports.items():
         if "8000" in key and val:
             mapped_port = val[0].get("HostPort", "unknown")
