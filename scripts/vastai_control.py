@@ -58,10 +58,6 @@ def api_delete(path):
     r.raise_for_status()
     return r.json()
 
-
-import subprocess
-import json
-
 def find_best_offer():
     print(f"Searching for offers...")
     
@@ -77,6 +73,8 @@ def find_best_offer():
             and o.get("num_gpus", 0) == 1
             and o.get("gpu_ram", 0) >= 12000
             and (o.get("cuda_max_good", 0) >= 11.8 or o.get("cuda_vers", 0) >= 11.8)
+            and o.get("gpu_frac", 0) == 1.0        # GPU dedicada completa, no particionada
+            and o.get("direct_port_count", 0) > 0  # tiene puertos directos disponibles
     ]
     
     if not filtered:
