@@ -22,12 +22,12 @@ RUN pip install --no-cache-dir --upgrade pip setuptools wheel
 WORKDIR /app
 
 COPY tts/requirements.txt ./requirements.txt
-COPY tts/src/inference/xtts_wrapper.py ./inference/xtts_wrapper.py
+COPY tts/src/inference/ ./inference/
 COPY tts/src/streaming/server.py ./server.py
-COPY tts/src/watchdog/watchdog.py ./watchdog.py
+COPY tts/src/watchdog/ ./watchdog/
 COPY tts/docker/entrypoint.sh ./entrypoint.sh
 
-RUN touch inference/__init__.py
+RUN touch inference/__init__.py watchdog/__init__.py
 
 RUN pip install --no-cache-dir "numpy>=1.23.5,<1.25.0" "transformers>=4.31.0,<4.35.0"
 RUN pip install --no-cache-dir -r requirements.txt

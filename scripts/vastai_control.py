@@ -92,6 +92,22 @@ def find_best_offer():
           f" VRAM={best.get('gpu_ram', 0)  / 1024}GB")
     return best["id"]
 
+def wait_for_health(ip, port, max_wait=300):
+    url = f"http://{ip}:{port}/health"
+    print(f"Waiting for server to be ready at {url}...")
+    deadline = time.time() + max_wait
+    while time.time() < deadline:
+        try:
+            r = requests.get(url, timeout=5)
+            if r.status_code == 200:
+                print(f"Server is ready! {r.json()}")
+                return
+        except Exception:
+            pass
+        print("  Not ready yet, retrying in 15s...")
+        time.sleep(15)
+    print("Server did not become healthy in time.")
+
 
 def start_instance():
     """Crea y arranca una nueva instancia con la imagen de PVC TTS."""
@@ -117,49 +133,43 @@ def start_instance():
         "BACKEND_URL": BACKEND_URL,
         "INTERNAL_SECRET": INTERNAL_SECRET,
         "WATCHDOG_TIMEOUT_SECONDS": "1800",
+        "NVIDIA_VISIBLE_DEVICES": "all",
     }
 
-    body = {
+    result = api_put(f"/asks/{offer_id}/", {
         "image": image,
         "disk": 40,
         "env": {k: v for k, v in env_vars.items() if v},
         "ports": "8000/tcp",
         "runtype": "ssh",
-        "onstart": "bash /app/entrypoint.sh"
-    }
-        
-    result = api_put(
-        f"/asks/{offer_id}/",
-        body
-    )
+        "onstart": "bash /app/entrypoint.sh",
+    })
 
     instance_id = result.get("new_contract")
     if not instance_id:
         print(f"Unexpected response: {result}")
         sys.exit(1)
 
+
     # Inyectar VAST_INSTANCE_ID ahora que lo sabemos
     api_put(f"/instances/{instance_id}/", {
-        "env": {
-            "VAST_API_KEY": API_KEY,
-            "BACKEND_URL": BACKEND_URL,
-            "INTERNAL_SECRET": INTERNAL_SECRET,
-            "WATCHDOG_TIMEOUT_SECONDS": "1800",
-            "NVIDIA_VISIBLE_DEVICES": "all",
-            "VAST_INSTANCE_ID": str(instance_id),  # ← ahora sí lo tenemos
-        }
+        "env": {**{k: v for k, v in env_vars.items() if v}, "VAST_INSTANCE_ID": str(instance_id)}
     })
 
-    # Inyectar el VAST_INSTANCE_ID una vez que sabemos el ID
-    # (lo necesita el watchdog para poder auto-destruirse)
     print(f"Instance created: ID={instance_id}")
     print("Waiting for instance to boot (this may take 3-5 minutes)...")
 
     _wait_until_running(instance_id)
 
     info = api_get(f"/instances/{instance_id}/")
-    info = info.get("instances", info)  # la API a veces devuelve el objeto directo
+    info = info.get("instances", info)
     print_connection_info(info)
+
+    ip = info.get("public_ipaddr")
+    ports = info.get("ports", {}) or {}
+    port = ports.get("8000/tcp", [{}])[0].get("HostPort")
+    if ip and port:
+        wait_for_health(ip, port)
 
     return instance_id
 
