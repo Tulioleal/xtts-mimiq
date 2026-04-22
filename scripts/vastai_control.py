@@ -99,8 +99,11 @@ def start_instance():
     # Chequear si ya hay una instancia corriendo
     existing = get_running_instance()
     if existing:
-        print(f"Instance already running: ID={existing['id']} "
-              f"Status={existing['actual_status']}")
+        if existing.get("actual_status") != "running":
+            print(f"Instance found but not ready: ID={existing['id']} Status={existing['actual_status']}")
+            _wait_until_running(existing["id"])
+            existing = api_get(f"/instances/{existing['id']}/")
+        print(f"Instance already running: ID={existing['id']}")
         print_connection_info(existing)
         return existing["id"]
 
@@ -135,6 +138,18 @@ def start_instance():
     if not instance_id:
         print(f"Unexpected response: {result}")
         sys.exit(1)
+
+    # Inyectar VAST_INSTANCE_ID ahora que lo sabemos
+    api_put(f"/instances/{instance_id}/", {
+        "env": {
+            "VAST_API_KEY": API_KEY,
+            "BACKEND_URL": BACKEND_URL,
+            "INTERNAL_SECRET": INTERNAL_SECRET,
+            "WATCHDOG_TIMEOUT_SECONDS": "1800",
+            "NVIDIA_VISIBLE_DEVICES": "all",
+            "VAST_INSTANCE_ID": str(instance_id),  # ← ahora sí lo tenemos
+        }
+    })
 
     # Inyectar el VAST_INSTANCE_ID una vez que sabemos el ID
     # (lo necesita el watchdog para poder auto-destruirse)
@@ -194,12 +209,13 @@ def status():
 
 def print_connection_info(instance):
     ip = instance.get("public_ipaddr", "unknown")
-    ports = instance.get("ports", {})
+    ports = instance.get("ports", {}) or {}
     mapped_port = "unknown"
-    if ports:
-        port_info = ports.get("8000/tcp", [{}])
-        if port_info:
-            mapped_port = port_info[0].get("HostPort", "unknown")
+    
+    for key, val in ports.items():
+        if "8000" in key and val:
+            mapped_port = val[0].get("HostPort", "unknown")
+            break
 
     print(f"\nConnection:")
     print(f"  IP:   {ip}")
