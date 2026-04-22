@@ -208,28 +208,21 @@ def print_connection_info(instance):
 
 
 def _wait_until_running(instance_id: str, max_wait: int = 600):
-    """Espera hasta que la instancia este en estado 'running'."""
     deadline = time.time() + max_wait
     dots = 0
     while time.time() < deadline:
         try:
             data = api_get(f"/instances/{instance_id}/")
-            inst = data if "actual_status" in data else data.get("instances", {})
+            # La API devuelve {"instances": {...}} o el objeto directo
+            inst = data.get("instances", data)
+            # Si instances es una lista, tomar el primero
+            if isinstance(inst, list):
+                inst = inst[0] if inst else {}
             status_val = inst.get("actual_status", "unknown") if isinstance(inst, dict) else "unknown"
-        except Exception:
+        except Exception as e:
+            print(f"  Error polling: {e}")
             status_val = "unknown"
-
-        print(f"\r  [{status_val}] {'.' * (dots % 4 + 1)}   ", end="", flush=True)
-        dots += 1
-
-        if status_val == "running":
-            print("\n  Instance is running!")
-            return
-
-        time.sleep(15)
-
-    print(f"\nTimeout after {max_wait}s. Check Vast.ai dashboard.")
-    sys.exit(1)
+        ...
 
 
 if __name__ == "__main__":
