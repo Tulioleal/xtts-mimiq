@@ -35,6 +35,10 @@ INTERNAL_SECRET = os.environ.get("INTERNAL_SECRET", "")
 
 HEADERS = {"Authorization": f"Bearer {API_KEY}"}
 
+# Al inicio del archivo, después de los otros env vars
+BLACKLISTED_IDS = set(
+    int(x) for x in os.environ.get("BLACKLISTED_MACHINE_IDS", "").split(",") if x.strip()
+)
 
 def api_get(path):
     r = requests.get(f"{API_BASE}{path}", headers=HEADERS)
@@ -76,6 +80,7 @@ def find_best_offer():
             and (o.get("cuda_max_good", 0) >= 11.8 or o.get("cuda_vers", 0) >= 11.8)
             and o.get("gpu_frac", 0) == 1.0
             and o.get("direct_port_count", 0) > 0
+            and o.get("machine_id") not in BLACKLISTED_IDS
     ]
     
     if not filtered:

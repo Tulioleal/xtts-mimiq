@@ -28,4 +28,5 @@ jobs:
           DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
           BACKEND_URL: ${{ secrets.BACKEND_URL }}
           INTERNAL_SECRET: ${{ secrets.INTERNAL_SECRET }}
+          BLACKLISTED_MACHINE_IDS: "61370"
         run: python scripts/vastai_control.py start
