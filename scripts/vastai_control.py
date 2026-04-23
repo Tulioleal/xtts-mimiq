@@ -40,6 +40,19 @@ BLACKLISTED_IDS = set(
     int(x) for x in os.environ.get("BLACKLISTED_MACHINE_IDS", "").split(",") if x.strip()
 )
 
+SAFE_GPUS = [
+    "RTX 3090",
+    "RTX 4090",
+    "RTX 3080",
+    "RTX 4080",
+    "A100",
+    "A40",
+    "L40",
+]
+
+def is_safe_gpu(name: str) -> bool:
+    return any(safe in name for safe in SAFE_GPUS)
+
 def api_get(path):
     r = requests.get(f"{API_BASE}{path}", headers=HEADERS)
     r.raise_for_status()
@@ -76,11 +89,10 @@ def find_best_offer():
             and o.get("rentable", False)
             and o.get("disk_space", 0) >= 30
             and o.get("num_gpus", 0) == 1
-            and o.get("gpu_ram", 0) >= 12000
-            and (o.get("cuda_max_good", 0) >= 11.8 or o.get("cuda_vers", 0) >= 11.8)
             and o.get("gpu_frac", 0) == 1.0
             and o.get("direct_port_count", 0) > 0
             and o.get("machine_id") not in BLACKLISTED_IDS
+            and is_safe_gpu(o.get("gpu_name", ""))   # 👈 NUEVO
     ]
     
     if not filtered:
@@ -94,7 +106,8 @@ def find_best_offer():
           f" Reliability={best.get('reliability2', 0):.2%}"
           f" Disk={best.get('disk_space', 0)}GB"
           f" Rentable={best.get('rentable', False)}"
-          f" VRAM={best.get('gpu_ram', 0)  / 1024}GB")
+          f" VRAM={best.get('gpu_ram', 0)  / 1024}GB"
+          f"Selected GPU: {best['gpu_name']}")
     return best["id"]
 
 def wait_for_health(ip, port, max_wait=300):
@@ -109,8 +122,8 @@ def wait_for_health(ip, port, max_wait=300):
                 return
         except Exception:
             pass
-        print("  Not ready yet, retrying in 15s...")
-        time.sleep(15)
+        print("  Not ready yet, retrying in 30s...")
+        time.sleep(30)
     print("Server did not become healthy in time.")
 
 
