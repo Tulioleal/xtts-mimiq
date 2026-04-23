@@ -5,6 +5,7 @@ TTS==0.22.0
 fastapi==0.111.0
 uvicorn[standard]==0.29.0
 python-multipart==0.0.9   # necesario para File uploads en FastAPI
+soundfile==0.12.1
 
 # HTTP client (para registrarse con el backend y el watchdog)
 requests==2.31.0

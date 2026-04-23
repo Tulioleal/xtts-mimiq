@@ -88,8 +88,8 @@ async def synthesize(
 
         return Response(
             content=wav_bytes,
-            media_type="audio/wav",
-            headers={"Content-Disposition": "attachment; filename=output.wav"},
+            media_type="audio/ogg",  # ← cambiar
+            headers={"Content-Disposition": "attachment; filename=output.ogg"},  # ← cambiar
         )
 
     except Exception as e:
