@@ -208,7 +208,7 @@ def start_instance():
     ports = info.get("ports", {}) or {}
     port = ports.get("8000/tcp", [{}])[0].get("HostPort")
     if ip and port:
-        wait_for_health(ip, port)
+        wait_for_health(ip, port, max_wait=600)
 
     return instance_id
 
