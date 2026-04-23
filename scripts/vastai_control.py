@@ -173,7 +173,16 @@ def start_instance():
     print(f"Instance created: ID={instance_id}")
     print("Waiting for instance to boot (this may take 3-5 minutes)...")
 
-    _wait_until_running(instance_id)
+    try:
+        _wait_until_running(instance_id)
+    except RuntimeError as e:
+        print(f"  Instance failed: {e}. Destroying and giving up.")
+        try:
+            api_delete(f"/instances/{instance_id}/")
+            print(f"  Instance {instance_id} destroyed.")
+        except Exception:
+            pass
+        sys.exit(1)
 
     info = api_get(f"/instances/{instance_id}/")
     info = info.get("instances", info)
@@ -251,6 +260,10 @@ def print_connection_info(instance):
 def _wait_until_running(instance_id: str, max_wait: int = 900):
     deadline = time.time() + max_wait
     dots = 0
+    last_status = None
+    status_unchanged_since = time.time()
+    STATUS_STUCK_TIMEOUT = 300
+
     while time.time() < deadline:
         try:
             data = api_get(f"/instances/{instance_id}/")
@@ -268,6 +281,15 @@ def _wait_until_running(instance_id: str, max_wait: int = 900):
             print(f"  Error polling: {e}")
             status_val = "unknown"
 
+        if status_val != last_status:
+            last_status = status_val
+            status_unchanged_since = time.time()
+
+        stuck_seconds = time.time() - status_unchanged_since
+        if status_val in ("created", "loading") and stuck_seconds > STATUS_STUCK_TIMEOUT:
+            print(f"\n  Instance stuck in '{status_val}' for {int(stuck_seconds)}s. Host is broken.")
+            raise RuntimeError(f"Instance stuck in {status_val}")
+
         print(f"\r  [{status_val}] {'.' * (dots % 4 + 1)}   ", end="", flush=True)
         dots += 1
 
@@ -275,10 +297,10 @@ def _wait_until_running(instance_id: str, max_wait: int = 900):
             print("\n  Instance is running!")
             return
 
-        time.sleep(30)  # ← 30 en lugar de 15
+        time.sleep(10)
 
     print(f"\nTimeout after {max_wait}s. Check Vast.ai dashboard.")
-    sys.exit(1)
+    raise RuntimeError("Timeout waiting for instance")
 
 
 if __name__ == "__main__":
