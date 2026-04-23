@@ -92,7 +92,8 @@ def find_best_offer():
             and o.get("gpu_frac", 0) == 1.0
             and o.get("direct_port_count", 0) > 0
             and o.get("machine_id") not in BLACKLISTED_IDS
-            and is_safe_gpu(o.get("gpu_name", ""))   # 👈 NUEVO
+            and is_safe_gpu(o.get("gpu_name", ""))
+            and o.get("static_ip", False)
     ]
     
     if not filtered:
@@ -202,6 +203,9 @@ def start_instance():
 
     info = api_get(f"/instances/{instance_id}/")
     info = info.get("instances", info)
+    
+    print("Instance fields:", json.dumps({k: v for k, v in info.items() 
+        if any(x in k.lower() for x in ['ip', 'host', 'addr', 'port'])}, indent=2))
     print_connection_info(info)
 
     ip = info.get("ssh_host") or info.get("public_ipaddr")
