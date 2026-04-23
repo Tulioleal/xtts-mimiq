@@ -265,7 +265,7 @@ def _wait_until_running(instance_id: str, max_wait: int = 900):
     dots = 0
     last_status = None
     status_unchanged_since = time.time()
-    STATUS_STUCK_TIMEOUT = 300
+    STATUS_STUCK_TIMEOUT = 450
 
     while time.time() < deadline:
         try:
