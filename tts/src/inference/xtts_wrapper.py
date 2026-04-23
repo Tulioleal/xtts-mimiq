@@ -62,10 +62,17 @@ class XTTSWrapper:
         duration = len(wav_array) / 24000
         print(f"[XTTS] Expected duration: {duration:.2f}s")
 
-        if hasattr(wav_array, 'cpu'):  # es un tensor de PyTorch
+        if hasattr(wav_array, 'cpu'):
             wav_array = wav_array.cpu().numpy()
 
-        return self._to_wav_bytes(wav_array, sample_rate=24000)
+        return self._to_ogg_bytes(wav_array, sample_rate=24000)
+    
+    def _to_ogg_bytes(self, wav_array: np.ndarray, sample_rate: int) -> bytes:
+        """Convierte numpy float32 array a bytes OGG Vorbis."""
+        buffer = io.BytesIO()
+        sf.write(buffer, wav_array, sample_rate, format="OGG", subtype="VORBIS")
+        buffer.seek(0)
+        return buffer.read()
 
     def generate_streaming(self, text: str, speaker_wav_path: str, language: str = "es"):
         """
