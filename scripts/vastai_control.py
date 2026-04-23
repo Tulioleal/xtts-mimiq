@@ -311,6 +311,8 @@ def _wait_until_running(instance_id: str, max_wait: int = 900):
 
         if status_val == "running":
             print("\n  Instance is running!")
+            print("  Waiting 30s for ports to be exposed...")
+            time.sleep(30)
             return
 
         time.sleep(10)
