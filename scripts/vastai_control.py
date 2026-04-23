@@ -193,7 +193,7 @@ def start_instance():
     info = info.get("instances", info)
     print_connection_info(info)
 
-    ip = info.get("public_ipaddr")
+    ip = info.get("ssh_host") or info.get("public_ipaddr")
     ports = info.get("ports", {}) or {}
     port = ports.get("8000/tcp", [{}])[0].get("HostPort")
     if ip and port:
