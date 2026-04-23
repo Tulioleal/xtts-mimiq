@@ -6,6 +6,7 @@ from pathlib import Path
 import glob
 from TTS.tts.configs.xtts_config import XttsConfig
 from TTS.tts.models.xtts import Xtts
+import soundfile as sf
 
 matches = glob.glob("/app/model/**/config.json", recursive=True)
 MODEL_DIR = Path(matches[0]).parent if matches else Path("/app/model")
