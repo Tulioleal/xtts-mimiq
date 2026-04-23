@@ -31,21 +31,15 @@ class XTTSWrapper:
         print("[XTTS] Model ready.")
 
     def generate(self, text: str, speaker_wav_path: str, language: str = "es") -> bytes:
-        """
-        Genera audio completo y lo devuelve como bytes WAV.
-        speaker_wav_path: archivo .wav de referencia de voz (1-2 minutos idealmente)
-        """
         if self.model is None:
             raise RuntimeError("Model not loaded. Call load() first.")
 
-        # Computar embeddings de la voz de referencia
         gpt_cond_latent, speaker_embedding = self.model.get_conditioning_latents(
             audio_path=[speaker_wav_path],
             gpt_cond_len=30,
             max_ref_length=60,
         )
 
-        # Inferencia
         outputs = self.model.inference(
             text=text,
             language=language,
@@ -58,8 +52,19 @@ class XTTSWrapper:
             top_p=0.85,
         )
 
-        # outputs["wav"] es un numpy array float32 a 24000 Hz
         wav_array = outputs["wav"]
+        
+        # Debug: ver qué devuelve el modelo
+        print(f"[XTTS] wav_array type: {type(wav_array)}")
+        print(f"[XTTS] wav_array shape: {wav_array.shape if hasattr(wav_array, 'shape') else 'no shape'}")
+        print(f"[XTTS] wav_array dtype: {wav_array.dtype if hasattr(wav_array, 'dtype') else 'unknown'}")
+        print(f"[XTTS] wav_array min/max: {wav_array.min():.4f} / {wav_array.max():.4f}")
+        duration = len(wav_array) / 24000
+        print(f"[XTTS] Expected duration: {duration:.2f}s")
+
+        if hasattr(wav_array, 'cpu'):  # es un tensor de PyTorch
+            wav_array = wav_array.cpu().numpy()
+
         return self._to_wav_bytes(wav_array, sample_rate=24000)
 
     def generate_streaming(self, text: str, speaker_wav_path: str, language: str = "es"):
