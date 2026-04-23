@@ -141,8 +141,6 @@ def start_instance():
         print("No offers found after 5 minutes. Giving up.")
         sys.exit(1)
 
-    offer_id = find_best_offer()
-
     image = f"{DOCKERHUB_USERNAME}/pvc-tts:latest"
     print(f"Creating instance with image: {image}")
 
