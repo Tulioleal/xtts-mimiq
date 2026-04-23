@@ -40,44 +40,17 @@ class XTTSWrapper:
             max_ref_length=60,
         )
 
-        try:
-            outputs = self.model.inference(
-                text=text,
-                language=language,
-                gpt_cond_latent=gpt_cond_latent,
-                speaker_embedding=speaker_embedding,
-                temperature=0.7,
-                length_penalty=1.0,
-                repetition_penalty=10.0,
-                top_k=50,
-                top_p=0.85,
-            )
-        except RuntimeError as e:
-            if "CUDA" in str(e):
-                print(f"[XTTS] CUDA runtime error, retrying on CPU: {e}")
-                self.device = "cpu"
-                self.model.to(self.device)
-
-                # 🔁 recalcular latents en CPU (CRÍTICO)
-                gpt_cond_latent, speaker_embedding = self.model.get_conditioning_latents(
-                    audio_path=[speaker_wav_path],
-                    gpt_cond_len=30,
-                    max_ref_length=60,
-                )
-
-                outputs = self.model.inference(
-                    text=text,
-                    language=language,
-                    gpt_cond_latent=gpt_cond_latent,
-                    speaker_embedding=speaker_embedding,
-                    temperature=0.7,
-                    length_penalty=1.0,
-                    repetition_penalty=10.0,
-                    top_k=50,
-                    top_p=0.85,
-                )
-            else:
-                raise
+        outputs = self.model.inference(
+            text=text,
+            language=language,
+            gpt_cond_latent=gpt_cond_latent,
+            speaker_embedding=speaker_embedding,
+            temperature=0.7,
+            length_penalty=1.0,
+            repetition_penalty=10.0,
+            top_k=50,
+            top_p=0.85,
+        )
 
         wav_array = outputs["wav"]
         
