@@ -32,6 +32,7 @@ RUN touch inference/__init__.py watchdog/__init__.py
 RUN pip install --no-cache-dir "numpy>=1.23.5,<1.25.0" "transformers>=4.31.0,<4.35.0"
 RUN pip install --no-cache-dir \
     torch==2.1.0 \
+    torchaudio==2.1.0 \
     --index-url https://download.pytorch.org/whl/cu121
 RUN pip install --no-cache-dir -r requirements.txt
 

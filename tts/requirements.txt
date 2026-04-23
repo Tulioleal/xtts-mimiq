@@ -1,10 +1,6 @@
 # TTS — contiene XTTS v2, mantenido por Coqui
 TTS==0.22.0
 
-# PyTorch con soporte CUDA (la version de CUDA debe coincidir con la imagen base)
-torch==2.1.0
-torchaudio==2.1.0
-
 # Servidor web
 fastapi==0.111.0
 uvicorn[standard]==0.29.0
