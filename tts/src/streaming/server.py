@@ -10,6 +10,7 @@ import os
 import sys
 import logging
 import tempfile
+import time
 import requests
 import uvicorn
 from fastapi import FastAPI, File, UploadFile, Form, HTTPException
@@ -109,24 +110,33 @@ def _register_with_backend():
     instance_id = os.environ.get("VAST_INSTANCE_ID")
     my_ip = os.environ.get("MY_PUBLIC_IP")
     port = os.environ.get("PORT", "8000")
+    attempts = int(os.environ.get("BACKEND_REGISTER_ATTEMPTS", "5"))
+    retry_delay_seconds = int(os.environ.get("BACKEND_REGISTER_RETRY_DELAY_SECONDS", "5"))
 
     if not backend_url:
         logger.warning("BACKEND_URL not set. Skipping backend registration.")
         return
 
-    try:
-        resp = requests.post(
-            f"{backend_url}/internal/tts-ready",
-            json={
-                "endpoint": f"http://{my_ip}:{port}",
-                "instance_id": instance_id,
-            },
-            headers={"X-Internal-Key": internal_key},
-            timeout=10,
-        )
-        logger.info(f"Registered with backend: {resp.status_code}")
-    except Exception as e:
-        logger.error(f"Failed to register with backend: {e}")
+    for attempt in range(1, attempts + 1):
+        try:
+            resp = requests.post(
+                f"{backend_url}/internal/tts-ready",
+                json={
+                    "endpoint": f"http://{my_ip}:{port}",
+                    "instance_id": instance_id,
+                },
+                headers={"X-Internal-Key": internal_key},
+                timeout=10,
+            )
+            resp.raise_for_status()
+            logger.info(f"Registered with backend: {resp.status_code}")
+            return
+        except Exception as e:
+            logger.warning(f"Registration attempt {attempt}/{attempts} failed: {e}")
+            if attempt == attempts:
+                logger.error("Failed to register with backend after all retry attempts.")
+                return
+            time.sleep(retry_delay_seconds)
 
 
 if __name__ == "__main__":
